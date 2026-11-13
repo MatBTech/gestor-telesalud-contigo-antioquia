@@ -3,5 +3,5 @@
 // Cambie la URL por la del servidor donde se publique el backend.
 export const environment = {
   produccion: true,
-  apiUrl: 'https://gestor-telesalud-contigo-antioquia.onrender.com',
+  apiUrl: 'https://gestor-telesalud-contigo-antioquia.onrender.com/api',
 };
