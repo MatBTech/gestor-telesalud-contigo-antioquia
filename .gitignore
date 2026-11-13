@@ -7,3 +7,10 @@ graphify-out/
 .DS_Store
 Thumbs.db
 *.log
+
+# Variables de entorno con credenciales (Neon, base de datos, JWT).
+.env
+.env.*
+!.env.example
+.neon
+node_modules/

@@ -25,6 +25,11 @@ import { SeedModule } from './seed/seed.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
+        // Si existe DATABASE_URL (por ejemplo la de Neon) se usa esa cadena y
+        // tiene prioridad sobre los DB_*. Neon solo acepta conexiones cifradas,
+        // por eso se activa SSL. Sin DATABASE_URL se usa el PostgreSQL local.
+        url: config.get<string>('DATABASE_URL') || undefined,
+        ssl: config.get<string>('DATABASE_URL') ? { rejectUnauthorized: true } : false,
         host: config.get<string>('DB_HOST', 'localhost'),
         port: Number(config.get('DB_PORT', 5432)),
         username: config.get<string>('DB_USERNAME', 'postgres'),
