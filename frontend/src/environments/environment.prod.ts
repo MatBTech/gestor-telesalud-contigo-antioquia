@@ -3,5 +3,5 @@
 // Cambie la URL por la del servidor donde se publique el backend.
 export const environment = {
   produccion: true,
-  apiUrl: 'https://github.com/MatBTech/gestor-telesalud-contigo-antioquia',
+  apiUrl: 'https://github.com/MatBTech/gestor-telesalud-contigo-antioquia/api',
 };
