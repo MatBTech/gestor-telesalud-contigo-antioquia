@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>Detalle de la atención</h2>
+
+<mat-dialog-content>
+  <div class="cabecera">
+    <div>
+      <span class="paciente">{{ a.nombrePaciente }}</span>
+      <span class="texto-secundario">{{ a.fechaAtencion | date: "dd/MM/yyyy 'a las' HH:mm" }}</span>
+    </div>
+    @if (a.resueltoEnTerritorio) {
+      <span class="etiqueta etiqueta-verde"><mat-icon inline>check</mat-icon>Resuelto en territorio</span>
+    } @else {
+      <span class="etiqueta etiqueta-amarilla"><mat-icon inline>local_shipping</mat-icon>Remitido</span>
+    }
+  </div>
+
+  <!-- Lista de definiciones: etiqueta a la izquierda y valor a la derecha -->
+  <dl class="datos">
+    <dt>Especialidad</dt>
+    <dd>{{ a.especialidad }}</dd>
+
+    <dt>Municipio</dt>
+    <dd>{{ a.municipio?.nombre }} <span class="texto-secundario">· {{ a.municipio?.subregion }}</span></dd>
+
+    <dt>Registrada por</dt>
+    <dd>{{ a.registradoPor?.nombreCompleto ?? 'Usuario no disponible' }}</dd>
+  </dl>
+
+  <div class="bloque">
+    <span class="titulo-bloque">Motivo de consulta</span>
+    <p class="motivo">{{ a.motivoConsulta }}</p>
+  </div>
+
+  <div class="bloque">
+    <span class="titulo-bloque">Soportes ({{ a.archivos?.length ?? 0 }})</span>
+    @for (ar of a.archivos ?? []; track ar.id) {
+      <div class="archivo">
+        <mat-icon>{{ ar.mimeType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon>
+        <div class="archivo-info">
+          <span class="archivo-nombre">{{ ar.nombreOriginal }}</span>
+          <span class="texto-secundario">{{ formatearTamano(ar.tamano) }} · {{ ar.subidoEn | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        <button mat-icon-button (click)="descargar(ar)" matTooltip="Descargar" [attr.aria-label]="'Descargar ' + ar.nombreOriginal">
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+    } @empty {
+      <p class="texto-secundario sin-margen">Esta atención no tiene actas ni evidencias adjuntas.</p>
+    }
+  </div>
+
+  @if (!datos.puedeEditar) {
+    <div class="aviso aviso-info">
+      <mat-icon>info</mat-icon>
+      <span>Solo puede editar las atenciones que usted registró.</span>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close cdkFocusInitial>Cerrar</button>
+  @if (datos.puedeEditar) {
+    <!-- Cierra devolviendo 'editar' para que el listado navegue al formulario -->
+    <button mat-flat-button [mat-dialog-close]="'editar'"><mat-icon>edit</mat-icon> Editar</button>
+  }
+</mat-dialog-actions>

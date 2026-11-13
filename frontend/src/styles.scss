@@ -1,0 +1,360 @@
+// Estilos globales y tema de Angular Material.
+// Se usan los colores institucionales de la Gobernacion de Antioquia:
+// verde como color principal y amarillo como color de acento.
+@use '@angular/material' as mat;
+
+// Paleta institucional. Se definen como variables CSS para poder usarlas
+// en cualquier componente con var(--ant-verde), etc.
+:root {
+  --ant-verde: #00843d;
+  --ant-verde-oscuro: #005c2a;
+  --ant-verde-claro: #e3f2e8;
+  --ant-amarillo: #fcc500;
+  --ant-amarillo-claro: #fff6d6;
+  --ant-gris-fondo: #f4f6f5;
+  --ant-gris-texto: #4a4f4c;
+  --ant-rojo: #b3261e;
+  --ant-rojo-claro: #fdecea;
+  --ant-azul: #1f5f99;
+}
+
+html {
+  color-scheme: light;
+  // Tema base de Material 3 con paletas verdes y amarillas.
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$green-palette,
+        tertiary: mat.$yellow-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // Se reemplazan los tonos generados por los colores exactos institucionales.
+  // Material 3 expone sus colores como variables --mat-sys-*.
+  --mat-sys-primary: #00843d;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #c8ead3;
+  --mat-sys-on-primary-container: #00391a;
+  --mat-sys-tertiary: #7a5d00;
+  --mat-sys-tertiary-container: #fcc500;
+  --mat-sys-on-tertiary-container: #2a1f00;
+  --mat-sys-error: #b3261e;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--ant-gris-fondo);
+  color: #1c1f1d;
+}
+
+// ---------- Utilidades de pagina ----------
+.pagina {
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.encabezado-pagina {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--ant-verde-oscuro);
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: var(--ant-gris-texto);
+  }
+}
+
+.tarjeta {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+// Barra de filtros: en escritorio los campos van en fila y en movil se apilan.
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+
+  mat-form-field {
+    flex: 1 1 200px;
+  }
+}
+
+// Contenedor con scroll horizontal para que las tablas no rompan el
+// diseno en pantallas pequenas.
+.tabla-contenedor {
+  overflow-x: auto;
+  width: 100%;
+
+  table {
+    width: 100%;
+    min-width: 720px;
+  }
+}
+
+.fila-vacia td {
+  text-align: center;
+  padding: 32px 16px !important;
+  color: var(--ant-gris-texto);
+}
+
+// Formularios en dos columnas en escritorio y una sola en movil.
+.formulario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  // Alinea arriba: si un campo tiene texto de ayuda y el de al lado no, la
+  // grilla no estira al segundo (se veia un recuadro mas alto que el otro).
+  align-items: start;
+  gap: 16px;
+
+  .ancho-completo {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .pagina {
+    padding: 12px;
+  }
+  .formulario-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.acciones-formulario {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+// Nota: los campos no usan placeholder. Con etiqueta flotante de Material,
+// el placeholder aparece de inmediato mientras la etiqueta todavia sube al
+// borde, y por un momento los dos textos se cruzan (muy visible en Brave).
+// Los ejemplos se muestran en <mat-hint>, debajo del campo.
+
+// Edge agrega su propio boton para ver la contrasena y otro para borrar el
+// campo. Se ocultan porque la aplicacion ya tiene su boton de "ver contrasena"
+// y salian dos ojos juntos.
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+// Columnas cortas de las tablas: no deben partirse en dos lineas.
+.mat-column-codigo,
+.mat-column-fecha,
+.mat-column-soportes,
+.mat-column-acciones,
+.mat-column-fechaAsignacion,
+.mat-column-resuelto,
+.mat-column-activo {
+  white-space: nowrap;
+}
+
+// Paginador: Material alinea el selector "registros por pagina" por la linea
+// base del texto y, con campos tipo outline, el selector queda corrido hacia
+// arriba. Se centra verticalmente y se separa de la tabla con una linea.
+.mat-mdc-paginator {
+  border-top: 1px solid #e3e7e4;
+  border-radius: 0 0 12px 12px;
+}
+
+// Tarjeta de tabla paginada: ocupa el alto disponible para que el paginador
+// quede abajo aunque haya pocas filas, y "sticky" lo mantiene visible al
+// hacer scroll cuando la tabla es larga.
+.tarjeta-tabla {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 330px);
+
+  .tabla-contenedor {
+    flex: 1;
+  }
+
+}
+
+// Paginador fijo abajo solo en pantallas medianas y grandes. En celular el
+// paginador ocupa dos lineas y, fijo, tapaba las filas de la tabla.
+@media (min-width: 768px) {
+  .tarjeta-tabla .mat-mdc-paginator {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+  }
+}
+
+// En celular la tarjeta de la tabla no necesita alto minimo: la tabla y el
+// paginador van seguidos.
+@media (max-width: 767px) {
+  .tarjeta-tabla {
+    min-height: 0;
+  }
+}
+.mat-mdc-paginator-container {
+  align-items: center;
+}
+.mat-mdc-paginator-page-size {
+  align-items: center !important;
+}
+.mat-mdc-paginator-page-size-select {
+  margin: 0 8px !important;
+  width: 84px !important;
+}
+
+// Contenido de los dialogos: los campos usan subscriptSizing "dynamic" (sin
+// espacio reservado para el error), asi que la separacion la da el gap.
+// El padding superior evita que la etiqueta del primer campo se corte.
+// Se antepone el contenedor para ganar especificidad: los estilos propios de
+// Material se cargan despues que este archivo y reemplazaban el display.
+.mat-mdc-dialog-container .mat-mdc-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 12px !important;
+  // Los dialogos solo deben desplazarse en vertical. El area tactil de los
+  // botones de icono (48px) puede sobresalir unos pixeles del borde derecho
+  // y generar una barra horizontal innecesaria.
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  > .aviso,
+  > p {
+    margin: 0;
+  }
+}
+
+// Bloque agrupado dentro de un formulario (por ejemplo la ubicacion del municipio).
+.grupo-campos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--ant-verde-claro);
+  border-radius: 10px;
+  background: #fafcfb;
+
+  .titulo-grupo {
+    font-weight: 500;
+    color: var(--ant-verde-oscuro);
+  }
+
+  p,
+  .aviso {
+    margin: 0;
+  }
+
+  .formulario-grid {
+    margin-top: 4px;
+  }
+}
+
+// ---------- Etiquetas de estado (chips simples) ----------
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.etiqueta-verde { background: var(--ant-verde-claro); color: var(--ant-verde-oscuro); }
+.etiqueta-amarilla { background: var(--ant-amarillo-claro); color: #6b5200; }
+.etiqueta-roja { background: var(--ant-rojo-claro); color: var(--ant-rojo); }
+.etiqueta-gris { background: #eceeed; color: #444; }
+.etiqueta-azul { background: #e3eef8; color: var(--ant-azul); }
+
+// ---------- Mensajes de ayuda dentro de formularios ----------
+.aviso {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+.aviso-error { background: var(--ant-rojo-claro); color: var(--ant-rojo); }
+.aviso-info { background: #e3eef8; color: var(--ant-azul); }
+.aviso-advertencia { background: var(--ant-amarillo-claro); color: #6b5200; }
+.aviso-exito { background: var(--ant-verde-claro); color: var(--ant-verde-oscuro); }
+
+// ---------- Notificaciones (snackbar) ----------
+.snack-exito {
+  --mat-snack-bar-container-color: var(--ant-verde-oscuro);
+  --mat-snack-bar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: var(--ant-amarillo);
+}
+.snack-error {
+  --mat-snack-bar-container-color: var(--ant-rojo);
+  --mat-snack-bar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: #fff;
+}
+.snack-info {
+  --mat-snack-bar-container-color: #2f3a34;
+  --mat-snack-bar-supporting-text-color: #fff;
+  --mat-snack-bar-button-color: var(--ant-amarillo);
+}
+
+// Los mensajes del snackbar pueden traer varias lineas (varios errores).
+.mat-mdc-snack-bar-label {
+  white-space: pre-line;
+}
+
+// Boton de peligro (eliminar) en rojo.
+.boton-peligro {
+  --mdc-filled-button-container-color: var(--ant-rojo);
+  --mat-button-filled-container-color: var(--ant-rojo);
+}
+
+.texto-secundario {
+  color: var(--ant-gris-texto);
+  font-size: 0.85rem;
+}
+
+.cargando-centro {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}

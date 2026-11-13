@@ -1,0 +1,17 @@
+# Opcional: levanta PostgreSQL con Docker en lugar de instalarlo en Windows.
+# Uso: docker compose up -d   (requiere Docker Desktop encendido)
+services:
+  postgres:
+    image: postgres:16
+    container_name: telesalud-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telesalud_antioquia
+    ports:
+      - '5432:5432'
+    volumes:
+      - datos_telesalud:/var/lib/postgresql/data
+
+volumes:
+  datos_telesalud:

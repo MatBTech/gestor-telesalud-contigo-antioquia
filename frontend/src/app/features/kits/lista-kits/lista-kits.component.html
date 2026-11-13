@@ -1,0 +1,119 @@
+<div class="pagina">
+  <div class="encabezado-pagina">
+    <div>
+      <h1>Inventario de kits satelitales</h1>
+      <p>{{ kits().length }} kit(s) registrados</p>
+    </div>
+    <button mat-flat-button (click)="nuevoKit()">
+      <mat-icon>add</mat-icon> Nuevo kit
+    </button>
+  </div>
+
+  <!-- Filtro rapido por estado, con el conteo de cada uno -->
+  <div class="tarjeta" style="margin-bottom: 16px; overflow-x: auto">
+    <mat-button-toggle-group [value]="filtroEstado()" (change)="filtroEstado.set($event.value)" aria-label="Filtrar por estado">
+      <mat-button-toggle value="todos">Todos ({{ kits().length }})</mat-button-toggle>
+      @for (e of estados; track e.valor) {
+        <mat-button-toggle [value]="e.valor">{{ e.etiqueta }} ({{ contar(e.valor) }})</mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+  </div>
+
+  <div class="tarjeta" style="padding: 0">
+    @if (cargando()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    <div class="tabla-contenedor">
+      <table mat-table [dataSource]="kitsFiltrados()">
+        <ng-container matColumnDef="codigo">
+          <th mat-header-cell *matHeaderCellDef>Código</th>
+          <td mat-cell *matCellDef="let k"><strong>{{ k.codigo }}</strong></td>
+        </ng-container>
+
+        <!-- Select para cambiar el estado. Se deshabilita si el kit esta dado
+             de baja (estado final) y la opcion actual no se puede volver a elegir. -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let k">
+            <mat-form-field class="select-estado" subscriptSizing="dynamic">
+              <mat-select
+                [value]="k.estado"
+                (selectionChange)="cambiarEstado(k, $event)"
+                [disabled]="k.estado === 'dado_de_baja'"
+                [attr.aria-label]="'Estado del kit ' + k.codigo"
+              >
+                <mat-select-trigger>
+                  <span [class]="'etiqueta ' + etiquetaEstado(k.estado).clase">
+                    <mat-icon inline>{{ etiquetaEstado(k.estado).icono }}</mat-icon>{{ etiquetaEstado(k.estado).etiqueta }}
+                  </span>
+                </mat-select-trigger>
+                @for (e of estados; track e.valor) {
+                  <mat-option [value]="e.valor" [disabled]="e.valor === k.estado && e.valor !== 'asignado'">
+                    {{ e.valor === 'asignado' && k.estado === 'asignado' ? 'Reasignar a otro municipio' : e.etiqueta }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="municipio">
+          <th mat-header-cell *matHeaderCellDef>Municipio</th>
+          <td mat-cell *matCellDef="let k">
+            @if (k.municipio) {
+              {{ k.municipio.nombre }}
+              <div class="texto-secundario">{{ k.municipio.subregion }}</div>
+            } @else {
+              <span class="texto-secundario">En bodega</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaAsignacion">
+          <th mat-header-cell *matHeaderCellDef>Fecha de asignación</th>
+          <td mat-cell *matCellDef="let k">{{ k.fechaAsignacion ? (k.fechaAsignacion | date: 'dd/MM/yyyy') : '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let k">
+            <button mat-icon-button (click)="verDetalle(k)" matTooltip="Ver detalle" [attr.aria-label]="'Ver detalle del kit ' + k.codigo">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <!-- Administrador y coordinador pueden editar; un kit dado de baja no -->
+            <span [matTooltip]="k.estado === 'dado_de_baja' ? 'Un kit dado de baja no puede editarse' : 'Editar'">
+              <button mat-icon-button (click)="editar(k)" [disabled]="k.estado === 'dado_de_baja'" [attr.aria-label]="'Editar kit ' + k.codigo">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </span>
+            @if (esAdmin) {
+              <!-- No se puede borrar un kit asignado; se explica en el tooltip -->
+              <span [matTooltip]="k.estado === 'asignado' ? 'Retire el kit del municipio antes de eliminarlo' : 'Eliminar'">
+                <button mat-icon-button (click)="eliminar(k)" [disabled]="k.estado === 'asignado'">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let fila; columns: columnas"></tr>
+        <tr class="mat-row fila-vacia" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="columnas.length">
+            @if (!cargando()) {
+              {{ kits().length === 0 ? 'No hay kits registrados. Use el botón "Nuevo kit".' : 'No hay kits en el estado seleccionado.' }}
+            }
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  .select-estado {
+    width: 210px;
+    margin: 6px 0;
+  }
+</style>

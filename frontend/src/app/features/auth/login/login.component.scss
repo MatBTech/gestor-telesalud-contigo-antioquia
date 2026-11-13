@@ -1,0 +1,80 @@
+// Fondo con degradado verde institucional y una franja amarilla inferior.
+.fondo-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  background: linear-gradient(160deg, var(--ant-verde) 0%, var(--ant-verde-oscuro) 100%);
+  border-bottom: 8px solid var(--ant-amarillo);
+}
+
+.tarjeta-login {
+  width: 100%;
+  max-width: 420px;
+  padding: 8px 8px 0;
+  overflow: hidden;
+  background: #fff;
+}
+
+.encabezado {
+  text-align: center;
+  padding: 16px 16px 24px;
+
+  .logo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 8px;
+    border-radius: 50%;
+    background: var(--ant-verde-claro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+      color: var(--ant-verde);
+    }
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--ant-verde-oscuro);
+  }
+
+  .subtitulo {
+    margin: 2px 0 0;
+    font-weight: 500;
+    color: #7a5d00;
+    letter-spacing: 0.5px;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.boton-ingresar {
+  height: 48px;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+.hint-advertencia {
+  color: #7a5d00;
+  font-weight: 500;
+}
+
+.pie {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ant-gris-texto);
+  padding: 8px 0 16px;
+  margin: 0;
+}

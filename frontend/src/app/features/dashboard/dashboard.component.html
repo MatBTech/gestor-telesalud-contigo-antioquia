@@ -1,0 +1,125 @@
+<div class="pagina">
+  <div class="encabezado-pagina">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Resumen del programa de telemedicina rural Contigo Antioquia</p>
+    </div>
+    <button mat-stroked-button (click)="cargar()" [disabled]="cargando()">
+      <mat-icon>refresh</mat-icon> Actualizar
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="cargando-centro"><mat-spinner diameter="48" /></div>
+  } @else if (error()) {
+    <div class="aviso aviso-error" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  } @else if (datos(); as d) {
+    <!-- Tarjetas con los indicadores principales -->
+    <section class="indicadores">
+      <div class="tarjeta indicador">
+        <mat-icon class="icono verde">medical_services</mat-icon>
+        <div>
+          <span class="valor">{{ d.resumen.totalAtenciones | number }}</span>
+          <span class="etiqueta-indicador">Atenciones registradas</span>
+        </div>
+      </div>
+      <div class="tarjeta indicador">
+        <mat-icon class="icono amarillo">home_health</mat-icon>
+        <div>
+          <span class="valor">{{ d.resumen.porcentajeResolucion | number: '1.0-1' }}%</span>
+          <span class="etiqueta-indicador">Resueltas en territorio ({{ d.resumen.resueltasEnTerritorio | number }})</span>
+        </div>
+      </div>
+      <div class="tarjeta indicador">
+        <mat-icon class="icono azul">location_city</mat-icon>
+        <div>
+          <span class="valor">{{ d.resumen.totalMunicipios | number }}</span>
+          <span class="etiqueta-indicador">Municipios registrados</span>
+        </div>
+      </div>
+      <div class="tarjeta indicador">
+        <mat-icon class="icono verde">satellite_alt</mat-icon>
+        <div>
+          <span class="valor">{{ d.resumen.kitsAsignados }} / {{ d.resumen.totalKits }}</span>
+          <span class="etiqueta-indicador">Kits asignados / total</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Alerta: municipios con kit pero sin atenciones recientes -->
+    <section class="tarjeta bloque">
+      <h2><mat-icon class="alerta">warning</mat-icon> Municipios con kit sin atenciones en los últimos 30 días</h2>
+      @if (d.municipiosSinAtencion.length === 0) {
+        <div class="aviso aviso-exito">
+          <mat-icon>check_circle</mat-icon>
+          <span>Todos los municipios con kit asignado registraron atenciones en los últimos 30 días.</span>
+        </div>
+      } @else {
+        <p class="texto-secundario">
+          Revise si el kit funciona correctamente o si el equipo de salud necesita acompañamiento.
+        </p>
+        <ul class="lista-alertas">
+          @for (m of d.municipiosSinAtencion; track m.id) {
+            <li>
+              <strong>{{ m.nombre }}</strong>
+              <span class="texto-secundario">{{ m.subregion }} · {{ m.kitsAsignados }} kit(s)</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <div class="dos-columnas">
+      <!-- Barras por subregion -->
+      <section class="tarjeta bloque">
+        <h2>Atenciones por subregión</h2>
+        @for (s of d.porSubregion; track s.subregion) {
+          <div class="barra-fila">
+            <span class="barra-texto">{{ s.subregion }}</span>
+            <div class="barra-fondo" [matTooltip]="s.total + ' atenciones'">
+              <div class="barra verde" [style.width.%]="porcentaje(s.total, maxSubregion())"></div>
+            </div>
+            <span class="barra-valor">{{ s.total }}</span>
+          </div>
+        } @empty {
+          <p class="texto-secundario">Todavía no hay atenciones registradas.</p>
+        }
+      </section>
+
+      <!-- Barras por especialidad -->
+      <section class="tarjeta bloque">
+        <h2>Atenciones por especialidad</h2>
+        @for (e of d.porEspecialidad; track e.especialidad) {
+          <div class="barra-fila">
+            <span class="barra-texto">{{ e.especialidad }}</span>
+            <div class="barra-fondo" [matTooltip]="e.resueltas + ' de ' + e.total + ' resueltas en territorio'">
+              <div class="barra amarilla" [style.width.%]="porcentaje(e.total, maxEspecialidad())"></div>
+            </div>
+            <span class="barra-valor">{{ e.total }}</span>
+          </div>
+        } @empty {
+          <p class="texto-secundario">Todavía no hay atenciones registradas.</p>
+        }
+      </section>
+    </div>
+
+    <!-- Kits por estado -->
+    <section class="tarjeta bloque">
+      <div class="titulo-con-accion">
+        <h2>Inventario de kits por estado</h2>
+        <a mat-button routerLink="/kits">Ver inventario</a>
+      </div>
+      <div class="estados-kit">
+        @for (k of kitsPorEstado(); track k.valor) {
+          <div class="estado-kit">
+            <span class="etiqueta" [class]="'etiqueta ' + k.clase"><mat-icon inline>{{ k.icono }}</mat-icon>{{ k.etiqueta }}</span>
+            <span class="valor">{{ k.total }}</span>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>

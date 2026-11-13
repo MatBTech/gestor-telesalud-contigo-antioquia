@@ -1,0 +1,239 @@
+<div class="pagina">
+  <div class="encabezado-pagina">
+    <div>
+      <h1>{{ modoEdicion() ? 'Editar atención' : 'Registrar atención' }}</h1>
+      <p>Los campos marcados con * son obligatorios.</p>
+    </div>
+    <a mat-button routerLink="/atenciones"><mat-icon>arrow_back</mat-icon> Volver al listado</a>
+  </div>
+
+  <div class="tarjeta">
+    @if (cargando() || guardando()) {
+      <mat-progress-bar mode="indeterminate" class="barra-carga" />
+    }
+
+    @if (errorServidor()) {
+      <div class="aviso aviso-error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <span style="white-space: pre-line">{{ errorServidor() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <fieldset [disabled]="guardando() || cargando()">
+        <h2 class="seccion">Datos del paciente</h2>
+        <div class="formulario-grid">
+          <mat-form-field class="ancho-completo">
+            <mat-label>Nombre completo del paciente</mat-label>
+            <!-- Sin placeholder: el ejemplo va en la ayuda de abajo. Un
+                 placeholder dentro del campo se cruza con la etiqueta mientras
+                 esta sube al borde (se notaba en Brave). -->
+            <input matInput formControlName="nombrePaciente" maxlength="120" autocomplete="off" />
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-hint>Ej: María Fernanda Restrepo</mat-hint>
+            <mat-hint align="end">{{ formulario.controls.nombrePaciente.value.length }}/120</mat-hint>
+            @if (formulario.controls.nombrePaciente.hasError('required') || formulario.controls.nombrePaciente.hasError('soloEspacios')) {
+              <mat-error>El nombre del paciente es obligatorio.</mat-error>
+            } @else if (formulario.controls.nombrePaciente.hasError('minlength')) {
+              <mat-error>Escriba al menos 3 caracteres.</mat-error>
+            } @else if (formulario.controls.nombrePaciente.hasError('pattern')) {
+              <mat-error>Solo se permiten letras y espacios (sin números ni símbolos).</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <h2 class="seccion">Datos de la teleconsulta</h2>
+        <div class="formulario-grid">
+          <mat-form-field>
+            <mat-label>Especialidad</mat-label>
+            <mat-select formControlName="especialidad">
+              @for (e of especialidades; track e) {
+                <mat-option [value]="e">{{ e }}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix>medical_services</mat-icon>
+            @if (formulario.controls.especialidad.hasError('required')) {
+              <mat-error>Seleccione la especialidad.</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Autocompletado: se escribe para buscar, pero se debe elegir de la lista -->
+          <mat-form-field>
+            <mat-label>Municipio</mat-label>
+            <!-- (input) alimenta el filtro con lo que se escribe. Al elegir una
+                 opcion el filtro se limpia para mostrar toda la lista la
+                 proxima vez que se abra. -->
+            <input
+              matInput
+              formControlName="municipio"
+              [matAutocomplete]="autoMunicipio"
+              (input)="textoMunicipio.set($any($event.target).value)"
+            />
+            <mat-icon matPrefix>location_on</mat-icon>
+            <mat-autocomplete
+              #autoMunicipio="matAutocomplete"
+              [displayWith]="mostrarMunicipio"
+              requireSelection
+              (optionSelected)="textoMunicipio.set('')"
+            >
+              @for (m of municipiosFiltrados(); track m.id) {
+                <mat-option [value]="m">
+                  {{ m.nombre }} <span class="texto-secundario">· {{ m.subregion }}</span>
+                </mat-option>
+              } @empty {
+                <mat-option disabled>No se encontraron municipios con ese nombre</mat-option>
+              }
+            </mat-autocomplete>
+            @if (municipios().length === 0 && !cargando()) {
+              <mat-hint class="hint-advertencia">No hay municipios registrados. Pida a un coordinador que los cree.</mat-hint>
+            } @else {
+              <mat-hint>Escriba para buscar y elija de la lista.</mat-hint>
+            }
+            @if (formulario.controls.municipio.hasError('required')) {
+              <mat-error>Escriba y elija el municipio de la lista.</mat-error>
+            } @else if (formulario.controls.municipio.hasError('noSeleccionado')) {
+              <mat-error>Elija un municipio de la lista desplegable.</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- El input es de solo lectura: la fecha se elige en el calendario,
+               asi se evitan formatos mal escritos como 31/02 o 2205. -->
+          <mat-form-field>
+            <mat-label>Fecha de la atención</mat-label>
+            <input
+              matInput
+              [matDatepicker]="selectorFecha"
+              formControlName="fechaAtencion"
+              [min]="fechaMinima"
+              [max]="fechaMaxima"
+              readonly
+              (click)="selectorFecha.open()"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="selectorFecha" />
+            <mat-datepicker #selectorFecha />
+            @if (formulario.controls.fechaAtencion.hasError('required')) {
+              <mat-error>Seleccione la fecha.</mat-error>
+            } @else if (formulario.controls.fechaAtencion.hasError('fechaFutura') || formulario.controls.fechaAtencion.hasError('matDatepickerMax')) {
+              <mat-error>La fecha no puede ser futura.</mat-error>
+            } @else if (formulario.controls.fechaAtencion.hasError('matDatepickerMin')) {
+              <mat-error>La fecha no puede tener más de un año de antigüedad.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Hora de la atención</mat-label>
+            <input matInput type="time" formControlName="horaAtencion" />
+            <mat-icon matPrefix>schedule</mat-icon>
+            @if (formulario.controls.horaAtencion.hasError('required')) {
+              <mat-error>Indique la hora.</mat-error>
+            }
+            @if (formulario.hasError('horaFutura') && (formulario.controls.horaAtencion.dirty || formulario.controls.fechaAtencion.dirty)) {
+              <mat-hint class="hint-error">La hora no puede ser posterior a la hora actual.</mat-hint>
+            }
+          </mat-form-field>
+
+          <mat-form-field class="ancho-completo">
+            <mat-label>Motivo de consulta</mat-label>
+            <textarea
+              matInput
+              formControlName="motivoConsulta"
+              rows="4"
+              maxlength="1000"
+            ></textarea>
+            <mat-hint>Describa los síntomas y el motivo (mínimo 10 caracteres).</mat-hint>
+            <mat-hint align="end">{{ largoMotivo() }}/1000</mat-hint>
+            @if (formulario.controls.motivoConsulta.hasError('required') || formulario.controls.motivoConsulta.hasError('soloEspacios')) {
+              <mat-error>El motivo de consulta es obligatorio.</mat-error>
+            } @else if (formulario.controls.motivoConsulta.hasError('minlength')) {
+              <mat-error>Describa el motivo con al menos 10 caracteres ({{ largoMotivo() }} escritos).</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Pregunta clave del programa: se usa radio Si/No sin valor por defecto -->
+          <div class="ancho-completo campo-radio">
+            <label id="etiqueta-resuelto" class="etiqueta-radio">¿El caso se resolvió en el territorio? *</label>
+            <mat-radio-group formControlName="resueltoEnTerritorio" aria-labelledby="etiqueta-resuelto">
+              <mat-radio-button [value]="true">Sí, se resolvió en el municipio</mat-radio-button>
+              <mat-radio-button [value]="false">No, el paciente fue remitido</mat-radio-button>
+            </mat-radio-group>
+            @if (formulario.controls.resueltoEnTerritorio.touched && formulario.controls.resueltoEnTerritorio.hasError('required')) {
+              <span class="error-campo" role="alert">Indique si el caso se resolvió en el territorio.</span>
+            }
+          </div>
+        </div>
+
+        <h2 class="seccion">Soporte (acta o evidencia fotográfica)</h2>
+
+        @if (archivosExistentes().length > 0) {
+          <ul class="lista-archivos">
+            @for (a of archivosExistentes(); track a.id) {
+              <!-- Grilla fija: icono | nombre con datos debajo | botones.
+                   Asi los botones nunca saltan de linea en pantallas angostas. -->
+              <li>
+                <mat-icon class="icono-archivo">{{ a.mimeType === 'application/pdf' ? 'picture_as_pdf' : 'image' }}</mat-icon>
+                <div class="info-archivo">
+                  <span class="nombre-archivo" [matTooltip]="a.nombreOriginal">{{ a.nombreOriginal }}</span>
+                  <span class="texto-secundario">{{ formatearTamano(a.tamano) }} · {{ a.subidoEn | date: 'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="botones-archivo">
+                  <button mat-icon-button type="button" (click)="descargar(a)" matTooltip="Descargar" [attr.aria-label]="'Descargar ' + a.nombreOriginal"><mat-icon>download</mat-icon></button>
+                  <button mat-icon-button type="button" (click)="eliminarArchivoExistente(a)" matTooltip="Eliminar" [attr.aria-label]="'Eliminar ' + a.nombreOriginal"><mat-icon color="warn">delete</mat-icon></button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="zona-archivo" [class.con-error]="errorArchivo()">
+          @if (archivo(); as f) {
+            <div class="archivo-elegido">
+              <mat-icon class="icono-ok">check_circle</mat-icon>
+              <div>
+                <strong>{{ f.name }}</strong>
+                <div class="texto-secundario">{{ formatearTamano(f.size) }} · se subirá al guardar</div>
+              </div>
+              <button mat-icon-button type="button" (click)="quitarArchivo()" matTooltip="Quitar archivo">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          } @else {
+            <mat-icon class="icono-subir">upload_file</mat-icon>
+            <p>Formatos permitidos: <strong>PDF, JPG o PNG</strong> · Tamaño máximo: <strong>{{ tamanoMaximoTexto }}</strong></p>
+            <!-- El input real esta oculto; el boton lo activa. "accept" filtra
+                 el explorador de archivos para mostrar solo los tipos validos. -->
+            <input #inputArchivo type="file" hidden [accept]="aceptarArchivos" (change)="seleccionarArchivo($event)" />
+            <button mat-stroked-button type="button" (click)="inputArchivo.click()">
+              <mat-icon>attach_file</mat-icon> Seleccionar archivo
+            </button>
+            <span class="texto-secundario">Opcional</span>
+          }
+        </div>
+        @if (errorArchivo()) {
+          <div class="aviso aviso-error" role="alert" style="margin-top: 8px">
+            <mat-icon>error_outline</mat-icon><span>{{ errorArchivo() }}</span>
+          </div>
+        }
+
+        <!-- Resumen de errores junto a los botones: se ve justo donde el
+             usuario hizo clic y no tapa ningun campo. -->
+        @if (intentoGuardar() && camposConError() > 0) {
+          <div class="aviso aviso-error resumen-errores" role="alert">
+            <mat-icon>error_outline</mat-icon>
+            <span>
+              {{ camposConError() === 1 ? 'Falta 1 campo por completar o corregir.' : 'Faltan ' + camposConError() + ' campos por completar o corregir.' }}
+              Revise los campos marcados en rojo.
+            </span>
+          </div>
+        }
+
+        <div class="acciones-formulario">
+          <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+          <button mat-flat-button type="submit" [disabled]="guardando() || cargando()">
+            <mat-icon>save</mat-icon>
+            {{ guardando() ? 'Guardando...' : (modoEdicion() ? 'Guardar cambios' : 'Registrar atención') }}
+          </button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</div>

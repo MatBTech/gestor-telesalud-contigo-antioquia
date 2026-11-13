@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>{{ titulo }}</h2>
+
+<form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+  <mat-dialog-content>
+    @if (error()) {
+      <div class="aviso aviso-error" role="alert">
+        <mat-icon>error_outline</mat-icon><span>{{ error() }}</span>
+      </div>
+    }
+
+    @if (pideCodigo) {
+      <mat-form-field>
+        <mat-label>Código del kit</mat-label>
+        <input matInput formControlName="codigo" maxlength="8" (input)="formatearCodigo()" autocomplete="off" />
+        <mat-hint>Formato KIT-0000, por ejemplo KIT-0001.</mat-hint>
+        @if (formulario.controls.codigo.hasError('required')) {
+          <mat-error>El código es obligatorio.</mat-error>
+        } @else if (formulario.controls.codigo.hasError('pattern')) {
+          <mat-error>Use el formato KIT-0000, por ejemplo KIT-0001.</mat-error>
+        } @else if (formulario.controls.codigo.hasError('repetido')) {
+          <mat-error>Ya existe un kit con el código {{ formulario.controls.codigo.value }}.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Descripción (opcional)</mat-label>
+        <textarea matInput formControlName="descripcion" maxlength="150" rows="3"></textarea>
+        <mat-hint>Ej: Antena + router + tensiómetro digital</mat-hint>
+        <mat-hint align="end">{{ formulario.controls.descripcion.value.length }}/150</mat-hint>
+      </mat-form-field>
+    }
+
+    @if (datos.modo === 'asignar') {
+      <p class="texto-secundario">Seleccione el municipio que recibirá el kit. El estado cambiará a <strong>Asignado</strong>.</p>
+    }
+
+    <!-- Al editar no se muestra el municipio: se cambia desde el estado del kit -->
+    @if (datos.modo !== 'editar') {
+      <mat-form-field>
+        <mat-label>{{ datos.modo === 'crear' ? 'Asignar a municipio (opcional)' : 'Municipio' }}</mat-label>
+        <mat-select formControlName="municipioId">
+          @if (datos.modo === 'crear') {
+            <mat-option [value]="null">Sin asignar (queda disponible en bodega)</mat-option>
+          }
+          @for (m of municipiosDisponibles; track m.id) {
+            <mat-option [value]="m.id">{{ m.nombre }} · {{ m.subregion }}</mat-option>
+          }
+        </mat-select>
+        @if (formulario.controls.municipioId.hasError('required')) {
+          <mat-error>Seleccione el municipio.</mat-error>
+        }
+      </mat-form-field>
+    } @else {
+      <p class="texto-secundario">Para asignar el kit a otro municipio o cambiar su estado, use el selector de estado en la tabla.</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : textoBoton }}
+    </button>
+  </mat-dialog-actions>
+</form>

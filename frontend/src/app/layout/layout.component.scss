@@ -1,0 +1,228 @@
+.contenedor {
+  height: 100vh;
+}
+
+.menu-lateral {
+  width: 248px;
+  // Animacion suave al replegar o desplegar.
+  transition: width 0.2s ease;
+  overflow-x: hidden;
+  background: var(--ant-verde-oscuro);
+  border-right: none;
+  --mat-list-list-item-label-text-color: #e8f3ec;
+  --mat-list-list-item-leading-icon-color: #b9dcc6;
+  --mat-list-list-item-hover-label-text-color: #fff;
+  --mat-list-list-item-hover-leading-icon-color: #fff;
+}
+
+// El logo es un boton: se quitan los estilos de boton del navegador y se
+// deja con la apariencia de la marca, mas un fondo suave al pasar el mouse.
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 18px 16px;
+  color: #fff;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ant-amarillo);
+    outline-offset: -2px;
+  }
+
+  mat-icon {
+    color: var(--ant-amarillo);
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .marca-texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: var(--ant-amarillo);
+  }
+
+  // Flecha que indica que el logo repliega la barra.
+  .flecha {
+    color: #b9dcc6;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+// Opcion activa: fondo mas claro y borde amarillo a la izquierda.
+a.activo {
+  background: rgba(255, 255, 255, 0.12);
+  border-left: 4px solid var(--ant-amarillo);
+  --mat-list-list-item-label-text-color: #fff;
+  --mat-list-list-item-leading-icon-color: var(--ant-amarillo);
+}
+
+// Version replegada: solo iconos centrados. El nombre de cada seccion se
+// ve en un tooltip al pasar el mouse.
+.menu-lateral.replegado {
+  width: 72px;
+
+  .marca {
+    justify-content: center;
+    padding: 18px 0;
+  }
+
+  // Cada opcion es un cuadro de 48px centrado en la barra de 72px.
+  a.mat-mdc-list-item {
+    width: 48px;
+    margin: 4px auto;
+    padding: 0 !important;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+  }
+
+  // Material deja 16px a la izquierda del icono; aqui se quitan para que el
+  // icono quede en el centro del cuadro.
+  ::ng-deep .mdc-list-item__start {
+    margin: 0 !important;
+  }
+
+  ::ng-deep .mdc-list-item__content {
+    display: none;
+  }
+
+  // Opcion activa: sin borde lateral (descentraria el icono), solo fondo e
+  // icono amarillo.
+  a.activo {
+    border-left: none;
+    background: rgba(255, 255, 255, 0.16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-lateral {
+    transition: none;
+  }
+}
+
+.barra-superior {
+  background: var(--ant-verde);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  --mat-icon-button-icon-color: #fff;
+  --mat-toolbar-container-text-color: #fff;
+}
+
+.franja {
+  height: 4px;
+  background: var(--ant-amarillo);
+}
+
+.titulo {
+  font-size: 1.1rem;
+  font-weight: 500;
+  // Si no cabe, se recorta con "..." en vez de empujar el boton de la cuenta.
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.espaciador {
+  flex: 1;
+}
+
+// Boton de la cuenta (nombre + icono) que abre el menu "Mi perfil / Cerrar sesion".
+.cuenta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 12px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ant-amarillo);
+    outline-offset: 2px;
+  }
+
+  .icono-cuenta {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .flecha-cuenta {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-left: -4px;
+  }
+}
+
+.usuario {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+  text-align: right;
+
+  .nombre {
+    font-size: 0.9rem;
+  }
+
+  .rol {
+    font-size: 0.75rem;
+    color: var(--ant-amarillo);
+  }
+}
+
+// En celular se oculta el nombre para que quepa el titulo.
+@media (max-width: 600px) {
+  .usuario .nombre {
+    display: none;
+  }
+}
+
+// Celulares muy angostos (320px): solo queda el icono de la cuenta. El rol
+// se sigue viendo en "Mi perfil".
+@media (max-width: 400px) {
+  .usuario,
+  .cuenta .flecha-cuenta {
+    display: none;
+  }
+
+  .cuenta {
+    padding: 4px;
+    flex-shrink: 0;
+  }
+}

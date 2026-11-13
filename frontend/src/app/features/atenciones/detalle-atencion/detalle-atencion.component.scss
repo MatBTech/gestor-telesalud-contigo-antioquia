@@ -1,0 +1,111 @@
+.cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+}
+
+// Cualquier texto largo sin espacios (motivo, nombres) se parte en vez de
+// ensanchar el dialogo.
+.paciente,
+.datos dd,
+.motivo {
+  overflow-wrap: anywhere;
+}
+
+.paciente {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--ant-verde-oscuro);
+}
+
+// Etiquetas en una columna fija y valores al lado; en celular se apilan.
+.datos {
+  display: grid;
+  // minmax(0, 1fr) deja que la columna de valores se encoja; con 1fr a secas
+  // un texto largo la ensancha y aparece scroll horizontal.
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+  padding: 12px 0;
+  border-top: 1px solid #e3e7e4;
+  border-bottom: 1px solid #e3e7e4;
+
+  dt {
+    color: var(--ant-gris-texto);
+    font-size: 0.85rem;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .datos {
+    grid-template-columns: 1fr;
+    gap: 2px;
+
+    dd {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.titulo-bloque {
+  font-weight: 500;
+  color: var(--ant-verde-oscuro);
+}
+
+.motivo {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.5;
+  background: var(--ant-gris-fondo);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.archivo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid #edf0ee;
+
+  > mat-icon {
+    color: var(--ant-verde);
+    flex-shrink: 0;
+  }
+}
+
+.archivo-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.archivo-nombre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sin-margen {
+  margin: 0;
+}

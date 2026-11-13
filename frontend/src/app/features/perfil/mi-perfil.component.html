@@ -1,0 +1,118 @@
+<div class="pagina">
+  <div class="encabezado-pagina">
+    <div>
+      <h1>Mi perfil</h1>
+      <p>Consulte y actualice sus datos de acceso al sistema.</p>
+    </div>
+  </div>
+
+  @if (usuario(); as u) {
+    <!-- Resumen de la cuenta -->
+    <section class="tarjeta resumen">
+      <div class="avatar" aria-hidden="true">{{ iniciales() }}</div>
+      <div class="resumen-datos">
+        <span class="nombre">{{ u.nombreCompleto }}</span>
+        <span class="texto-secundario">{{ u.correo }}</span>
+      </div>
+      <span class="etiqueta etiqueta-verde">{{ rol() }}</span>
+    </section>
+
+    <div class="columnas">
+      <!-- Datos personales -->
+      <section class="tarjeta">
+        <h2><mat-icon>badge</mat-icon> Mis datos</h2>
+
+        @if (errorDatos()) {
+          <div class="aviso aviso-error" role="alert"><mat-icon>error_outline</mat-icon><span>{{ errorDatos() }}</span></div>
+        }
+
+        <form [formGroup]="formDatos" (ngSubmit)="guardarDatos()" novalidate class="formulario">
+          <mat-form-field>
+            <mat-label>Nombre completo</mat-label>
+            <input matInput formControlName="nombreCompleto" maxlength="120" autocomplete="name" />
+            @if (formDatos.controls.nombreCompleto.hasError('required') || formDatos.controls.nombreCompleto.hasError('soloEspacios')) {
+              <mat-error>El nombre es obligatorio.</mat-error>
+            } @else if (formDatos.controls.nombreCompleto.hasError('pattern')) {
+              <mat-error>Solo se permiten letras y espacios.</mat-error>
+            } @else if (formDatos.controls.nombreCompleto.hasError('minlength')) {
+              <mat-error>Escriba al menos 3 caracteres.</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Campos de solo lectura: se muestran para que el usuario sepa
+               con que datos esta registrado, pero no los puede cambiar -->
+          <mat-form-field>
+            <mat-label>Correo electrónico</mat-label>
+            <input matInput [value]="u.correo" readonly tabindex="-1" />
+            <mat-icon matSuffix>lock</mat-icon>
+            <mat-hint>Para cambiar el correo o el rol, comuníquese con el administrador.</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Rol</mat-label>
+            <input matInput [value]="rol()" readonly tabindex="-1" />
+            <mat-icon matSuffix>lock</mat-icon>
+          </mat-form-field>
+
+          <div class="acciones">
+            <button mat-flat-button type="submit" [disabled]="guardandoDatos() || formDatos.pristine">
+              <mat-icon>save</mat-icon> {{ guardandoDatos() ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Cambio de contrasena -->
+      <section class="tarjeta">
+        <h2><mat-icon>key</mat-icon> Cambiar contraseña</h2>
+
+        @if (errorPassword()) {
+          <div class="aviso aviso-error" role="alert"><mat-icon>error_outline</mat-icon><span>{{ errorPassword() }}</span></div>
+        }
+
+        <form [formGroup]="formPassword" (ngSubmit)="cambiarPassword(fp)" #fp="ngForm" novalidate class="formulario">
+          <mat-form-field>
+            <mat-label>Contraseña actual</mat-label>
+            <input matInput [type]="mostrarPasswords() ? 'text' : 'password'" formControlName="passwordActual" maxlength="64" autocomplete="current-password" />
+            @if (formPassword.controls.passwordActual.hasError('required')) {
+              <mat-error>Ingrese su contraseña actual.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Contraseña nueva</mat-label>
+            <input matInput [type]="mostrarPasswords() ? 'text' : 'password'" formControlName="passwordNueva" maxlength="64" autocomplete="new-password" />
+            <mat-hint>Mínimo 8 caracteres, con mayúscula, minúscula y número.</mat-hint>
+            @if (formPassword.controls.passwordNueva.hasError('required')) {
+              <mat-error>Ingrese la contraseña nueva.</mat-error>
+            } @else if (formPassword.controls.passwordNueva.hasError('minlength')) {
+              <mat-error>Debe tener mínimo 8 caracteres.</mat-error>
+            } @else if (formPassword.controls.passwordNueva.hasError('pattern')) {
+              <mat-error>Debe incluir al menos una mayúscula, una minúscula y un número.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Confirmar contraseña nueva</mat-label>
+            <input matInput [type]="mostrarPasswords() ? 'text' : 'password'" formControlName="confirmarPassword" maxlength="64" autocomplete="new-password" />
+            @if (formPassword.controls.confirmarPassword.hasError('noCoinciden')) {
+              <mat-error>Las contraseñas no coinciden.</mat-error>
+            } @else if (formPassword.controls.confirmarPassword.hasError('required')) {
+              <mat-error>Confirme la contraseña nueva.</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="acciones">
+            <button mat-button type="button" (click)="mostrarPasswords.set(!mostrarPasswords())">
+              <mat-icon>{{ mostrarPasswords() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              {{ mostrarPasswords() ? 'Ocultar' : 'Mostrar' }} contraseñas
+            </button>
+            <button mat-flat-button type="submit" [disabled]="guardandoPassword()">
+              <mat-icon>lock_reset</mat-icon> {{ guardandoPassword() ? 'Cambiando...' : 'Cambiar contraseña' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</div>

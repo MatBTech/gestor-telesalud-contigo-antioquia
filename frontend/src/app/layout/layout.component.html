@@ -1,0 +1,105 @@
+<!-- autosize hace que el contenido se reacomode cuando la barra lateral
+     cambia de ancho al replegarse o desplegarse -->
+<mat-sidenav-container class="contenedor" autosize>
+  <!-- En movil el menu es "over" (se superpone) y en escritorio "side" (fijo).
+       En escritorio puede estar replegado: solo iconos. -->
+  <mat-sidenav
+    #sidenav
+    class="menu-lateral"
+    [class.replegado]="replegado()"
+    [mode]="esMovil() ? 'over' : 'side'"
+    [opened]="!esMovil()"
+    [fixedInViewport]="esMovil()"
+  >
+    <!-- El logo es el control para replegar o desplegar la barra en escritorio.
+         Es un <button> real para que funcione tambien con el teclado. -->
+    <button
+      type="button"
+      class="marca"
+      (click)="alternarMenu()"
+      [matTooltip]="replegado() ? 'Expandir menú' : 'Replegar menú'"
+      matTooltipPosition="right"
+      [matTooltipDisabled]="esMovil()"
+      [attr.aria-label]="replegado() ? 'Expandir menú' : 'Replegar menú'"
+      [attr.aria-expanded]="!replegado()"
+    >
+      <mat-icon>health_and_safety</mat-icon>
+      @if (!replegado()) {
+        <div class="marca-texto">
+          <strong>Telesalud</strong>
+          <span>Contigo Antioquia</span>
+        </div>
+        @if (!esMovil()) {
+          <mat-icon class="flecha">chevron_left</mat-icon>
+        }
+      }
+    </button>
+
+    <mat-nav-list>
+      @for (opcion of menu(); track opcion.ruta) {
+        <!-- routerLinkActive resalta la seccion actual para que el usuario
+             siempre sepa en que pantalla esta. Con la barra replegada el
+             nombre se muestra como tooltip al pasar el mouse. -->
+        <a
+          mat-list-item
+          [routerLink]="opcion.ruta"
+          routerLinkActive="activo"
+          #enlace="routerLinkActive"
+          [activated]="enlace.isActive"
+          [matTooltip]="opcion.texto"
+          matTooltipPosition="right"
+          [matTooltipDisabled]="!replegado()"
+          [attr.aria-label]="opcion.texto"
+        >
+          <mat-icon matListItemIcon>{{ opcion.icono }}</mat-icon>
+          @if (!replegado()) {
+            <span matListItemTitle>{{ opcion.texto }}</span>
+          }
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="contenido">
+    <mat-toolbar class="barra-superior">
+      <!-- Solo en celular: abre el menu superpuesto. En escritorio el menu se
+           repliega con el logo de la barra lateral. -->
+      @if (esMovil()) {
+        <button mat-icon-button (click)="alternarMenu()" aria-label="Abrir menú">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <span class="titulo">Gestor de Telesalud</span>
+      <span class="espaciador"></span>
+
+      <!-- Menu de la cuenta: el nombre del usuario abre las opciones
+           "Mi perfil" y "Cerrar sesion" -->
+      @if (usuario(); as u) {
+        <button class="cuenta" type="button" [matMenuTriggerFor]="menuCuenta" aria-label="Opciones de la cuenta">
+          <span class="usuario">
+            <span class="nombre">{{ u.nombreCompleto }}</span>
+            <span class="rol">{{ etiquetaRol() }}</span>
+          </span>
+          <mat-icon class="icono-cuenta">account_circle</mat-icon>
+          <mat-icon class="flecha-cuenta">expand_more</mat-icon>
+        </button>
+        <mat-menu #menuCuenta="matMenu" xPosition="before">
+          <a mat-menu-item routerLink="/perfil">
+            <mat-icon>person</mat-icon>
+            <span>Mi perfil</span>
+          </a>
+          <button mat-menu-item (click)="cerrarSesion()">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar sesión</span>
+          </button>
+        </mat-menu>
+      }
+    </mat-toolbar>
+    <!-- Franja amarilla institucional bajo la barra -->
+    <div class="franja"></div>
+
+    <main>
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

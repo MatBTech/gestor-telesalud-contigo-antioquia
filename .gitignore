@@ -1,0 +1,9 @@
+# Grafo de conocimiento local (herramienta de desarrollo, no es parte de la app).
+graphify-out/
+
+# Archivos de editor y sistema.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,77 @@
+.resumen {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+// Circulo con las iniciales del usuario.
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ant-verde);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 500;
+  border: 3px solid var(--ant-amarillo);
+  flex-shrink: 0;
+}
+
+// Base de 160px: si no cabe junto al rol, el rol baja a otra linea en vez
+// de partir el nombre a mitad de palabra. break-word solo corta palabras que
+// no caben en una linea entera (un correo muy largo).
+.resumen-datos {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 160px;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.nombre {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--ant-verde-oscuro);
+}
+
+// Dos columnas en escritorio; una sola en pantallas angostas.
+.columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--ant-verde-oscuro);
+  margin: 0 0 16px;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 400px) {
+  .columnas {
+    grid-template-columns: 1fr;
+  }
+}

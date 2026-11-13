@@ -1,0 +1,111 @@
+<h2 mat-dialog-title>{{ municipio ? 'Editar municipio' : 'Registrar municipio' }}</h2>
+
+<form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+  <mat-dialog-content>
+    @if (error()) {
+      <div class="aviso aviso-error" role="alert">
+        <mat-icon>error_outline</mat-icon><span style="white-space: pre-line">{{ error() }}</span>
+      </div>
+    }
+
+    <mat-form-field>
+      <mat-label>Nombre del municipio</mat-label>
+      <input matInput formControlName="nombre" maxlength="80" autocomplete="off" />
+      <mat-hint>Ej: Urrao</mat-hint>
+      @if (formulario.controls.nombre.hasError('required') || formulario.controls.nombre.hasError('soloEspacios')) {
+        <mat-error>El nombre es obligatorio.</mat-error>
+      } @else if (formulario.controls.nombre.hasError('pattern')) {
+        <mat-error>Solo se permiten letras y espacios.</mat-error>
+      } @else if (formulario.controls.nombre.hasError('repetido')) {
+        <mat-error>El municipio {{ formulario.controls.nombre.value.trim() }} ya está registrado.</mat-error>
+      } @else if (formulario.controls.nombre.hasError('minlength')) {
+        <mat-error>Escriba al menos 2 caracteres.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Subregión</mat-label>
+      <mat-select formControlName="subregion">
+        @for (s of subregiones; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+      @if (formulario.controls.subregion.hasError('required')) {
+        <mat-error>Seleccione la subregión.</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Bloque de geolocalizacion -->
+    <div class="grupo-campos">
+      <span class="titulo-grupo">Ubicación geográfica</span>
+
+      @if (!formulario.controls.manual.value) {
+        <p class="texto-secundario">
+          Las coordenadas se obtienen automáticamente de OpenStreetMap al guardar. Puede verificarlas antes con el botón.
+        </p>
+        <button mat-stroked-button type="button" style="align-self: flex-start" (click)="buscarCoordenadas()" [disabled]="buscando()">
+          @if (buscando()) {
+            <mat-spinner diameter="18" style="display: inline-block; margin-right: 6px" />
+          } @else {
+            <mat-icon>travel_explore</mat-icon>
+          }
+          Verificar coordenadas
+        </button>
+
+        @if (vistaPrevia(); as vp) {
+          <div class="aviso aviso-exito">
+            <mat-icon>place</mat-icon>
+            <div>
+              Lat {{ vp.latitud | number: '1.4-6' }}, Lon {{ vp.longitud | number: '1.4-6' }}
+              <div class="texto-secundario">{{ vp.nombreEncontrado }}</div>
+              @if (vp.subregion) {
+                <div>Subregión seleccionada según el mapa: <strong>{{ vp.subregion }}</strong></div>
+              }
+              <button mat-button type="button" (click)="usarVistaPreviaComoManual()">Ajustar manualmente</button>
+            </div>
+          </div>
+        }
+      }
+
+      @if (avisoNominatim()) {
+        <div class="aviso aviso-advertencia" role="alert">
+          <mat-icon>wifi_off</mat-icon><span>{{ avisoNominatim() }}</span>
+        </div>
+      }
+
+      <mat-checkbox formControlName="manual">Ingresar coordenadas manualmente</mat-checkbox>
+
+      @if (formulario.controls.manual.value) {
+        <div class="formulario-grid">
+          <mat-form-field>
+            <mat-label>Latitud</mat-label>
+            <input matInput type="number" step="0.000001" formControlName="latitud" />
+            <mat-hint>Entre {{ limites.latMin }} y {{ limites.latMax }}</mat-hint>
+            @if (formulario.controls.latitud.hasError('required')) {
+              <mat-error>La latitud es obligatoria.</mat-error>
+            } @else if (formulario.controls.latitud.hasError('min') || formulario.controls.latitud.hasError('max')) {
+              <mat-error>Fuera de Antioquia ({{ limites.latMin }} a {{ limites.latMax }}).</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Longitud</mat-label>
+            <input matInput type="number" step="0.000001" formControlName="longitud" />
+            <mat-hint>Entre {{ limites.lonMin }} y {{ limites.lonMax }} (negativa)</mat-hint>
+            @if (formulario.controls.longitud.hasError('required')) {
+              <mat-error>La longitud es obligatoria.</mat-error>
+            } @else if (formulario.controls.longitud.hasError('min') || formulario.controls.longitud.hasError('max')) {
+              <mat-error>Fuera de Antioquia ({{ limites.lonMin }} a {{ limites.lonMax }}). Recuerde el signo negativo.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="guardando()">
+      {{ guardando() ? (formulario.controls.manual.value ? 'Guardando...' : 'Consultando OpenStreetMap...') : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>

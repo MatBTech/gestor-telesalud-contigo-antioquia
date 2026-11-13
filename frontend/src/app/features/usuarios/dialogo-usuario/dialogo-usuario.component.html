@@ -1,0 +1,83 @@
+<h2 mat-dialog-title>{{ usuario ? 'Editar usuario' : 'Registrar usuario' }}</h2>
+
+<form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+  <mat-dialog-content>
+    @if (error()) {
+      <div class="aviso aviso-error" role="alert">
+        <mat-icon>error_outline</mat-icon><span style="white-space: pre-line">{{ error() }}</span>
+      </div>
+    }
+
+    <mat-form-field>
+      <mat-label>Nombre completo</mat-label>
+      <input matInput formControlName="nombreCompleto" maxlength="120" autocomplete="off" />
+      @if (formulario.controls.nombreCompleto.hasError('required') || formulario.controls.nombreCompleto.hasError('soloEspacios')) {
+        <mat-error>El nombre es obligatorio.</mat-error>
+      } @else if (formulario.controls.nombreCompleto.hasError('pattern')) {
+        <mat-error>Solo se permiten letras y espacios.</mat-error>
+      } @else if (formulario.controls.nombreCompleto.hasError('minlength')) {
+        <mat-error>Escriba al menos 3 caracteres.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput type="email" formControlName="correo" maxlength="120" autocomplete="off" />
+      @if (usuario) {
+        <mat-hint>El correo no se puede modificar.</mat-hint>
+      }
+      @if (formulario.controls.correo.hasError('required')) {
+        <mat-error>El correo es obligatorio.</mat-error>
+      } @else if (formulario.controls.correo.hasError('repetido')) {
+        <mat-error>Ya existe un usuario con ese correo.</mat-error>
+      } @else if (formulario.controls.correo.hasError('email')) {
+        <mat-error>Escriba un correo válido.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="rol">
+        @for (r of roles; track r.valor) {
+          <mat-option [value]="r.valor">{{ r.etiqueta }}</mat-option>
+        }
+      </mat-select>
+      @if (formulario.controls.rol.hasError('required')) {
+        <mat-error>Seleccione el rol.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{ usuario ? 'Nueva contraseña (opcional)' : 'Contraseña' }}</mat-label>
+      <input matInput [type]="mostrarPassword() ? 'text' : 'password'" formControlName="password" maxlength="64" autocomplete="new-password" />
+      <button mat-icon-button matSuffix type="button" (click)="mostrarPassword.set(!mostrarPassword())" aria-label="Mostrar u ocultar contraseña">
+        <mat-icon>{{ mostrarPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-hint>Mínimo 8 caracteres, con mayúscula, minúscula y número.</mat-hint>
+      @if (formulario.controls.password.hasError('required')) {
+        <mat-error>La contraseña es obligatoria.</mat-error>
+      } @else if (formulario.controls.password.hasError('minlength')) {
+        <mat-error>Debe tener mínimo 8 caracteres.</mat-error>
+      } @else if (formulario.controls.password.hasError('pattern')) {
+        <mat-error>Debe incluir al menos una mayúscula, una minúscula y un número.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Confirmar contraseña</mat-label>
+      <input matInput [type]="mostrarPassword() ? 'text' : 'password'" formControlName="confirmarPassword" maxlength="64" autocomplete="new-password" />
+      @if (formulario.controls.confirmarPassword.hasError('noCoinciden')) {
+        <mat-error>Las contraseñas no coinciden.</mat-error>
+      } @else if (formulario.controls.confirmarPassword.hasError('required')) {
+        <mat-error>Confirme la contraseña.</mat-error>
+      }
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+</form>
