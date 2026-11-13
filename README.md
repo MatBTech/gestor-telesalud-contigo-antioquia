@@ -72,9 +72,17 @@ npm start
 ```
 
 Abra `http://localhost:4200` e ingrese con:
-
+- Admin
 - Correo: `admin@telesalud.local`
-- Contrasena: `Admin12345` (cambiela en *Usuarios* despues del primer ingreso)
+- Contrasena: `Medico12345` (cambiela en *Usuarios* despues del primer ingreso)
+
+- Medico
+- Correo: `medico@telesalud.local`
+- Contrasena: `Admin12345`
+
+- Coordinador
+- Correo: `coordinadora@telesalud.local`
+- Contrasena: `Cor12345`
 
 ## 5. Recorrido sugerido de prueba (Fase 9)
 
